@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "752444547233",
+    "project_id": "broadcastmessenger-ea6cf",
+    "storage_bucket": "broadcastmessenger-ea6cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752444547233:android:c3f089d01f3f02656950e0",
+        "android_client_info": {
+          "package_name": "com.example.broadcast_messenger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKHK1BNTSwQnnE4f3B_TRkzWxgM0Mx4dg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752444547233:android:04f2da1946be80276950e0",
+        "android_client_info": {
+          "package_name": "com.example.medibroadcast"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKHK1BNTSwQnnE4f3B_TRkzWxgM0Mx4dg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
