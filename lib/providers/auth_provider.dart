@@ -15,8 +15,13 @@ class AuthProvider extends ChangeNotifier {
   /// Send OTP to the user's phone
   Future<void> sendOTP(BuildContext context, String phoneNumber) async {
 
+    // Sign out any existing user first
+    await _auth.signOut();
+
     isLoading = true;
     notifyListeners();
+
+    print("Sending OTP to: $phoneNumber");
 
     await _auth.verifyPhoneNumber(
 
@@ -69,6 +74,8 @@ class AuthProvider extends ChangeNotifier {
 
       isLoading = true;
       notifyListeners();
+
+      print("Verifying OTP: $otp with verificationId: $verificationId");
 
       PhoneAuthCredential credential =
       PhoneAuthProvider.credential(

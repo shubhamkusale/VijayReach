@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDKHK1BNTSwQnnE4f3B_TRkzWxgM0Mx4dg',
-    appId: '1:752444547233:android:c3f089d01f3f02656950e0',
+    appId: '1:752444547233:android:04f2da1946be80276950e0',
     messagingSenderId: '752444547233',
     projectId: 'broadcastmessenger-ea6cf',
     storageBucket: 'broadcastmessenger-ea6cf.firebasestorage.app',

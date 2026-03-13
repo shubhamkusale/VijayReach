@@ -1,4 +1,4 @@
-package com.example.broadcast_messenger
+package com.example.medibroadcast
 
 import io.flutter.embedding.android.FlutterActivity
 
