@@ -9,13 +9,12 @@ class AuthProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String verificationId = "";
-
   bool isLoading = false;
 
-  /// Send OTP to the user's phone
+  /// SEND OTP
   Future<void> sendOTP(BuildContext context, String phoneNumber) async {
 
-    // Sign out any existing user first
+    // Sign out existing user
     await _auth.signOut();
 
     isLoading = true;
@@ -28,11 +27,11 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phoneNumber,
 
       verificationCompleted: (PhoneAuthCredential credential) async {
-        // Automatic verification on some Android devices
         await _auth.signInWithCredential(credential);
       },
 
       verificationFailed: (FirebaseAuthException e) {
+
         isLoading = false;
         notifyListeners();
 
@@ -48,7 +47,6 @@ class AuthProvider extends ChangeNotifier {
         isLoading = false;
         notifyListeners();
 
-        // Navigate to OTP screen
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -63,7 +61,9 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  /// Verify OTP entered by user
+
+
+  /// VERIFY OTP
   Future<void> verifyOTP(
       BuildContext context,
       String otp,
@@ -86,7 +86,7 @@ class AuthProvider extends ChangeNotifier {
       // Sign in user
       await _auth.signInWithCredential(credential);
 
-      // Check Firestore role
+      // After login check role
       await _checkUserRole(context, phoneNumber);
 
     } catch (e) {
@@ -100,7 +100,9 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Check if user exists and determine role
+
+
+  /// CHECK USER ROLE + REGISTRATION
   Future<void> _checkUserRole(
       BuildContext context,
       String phoneNumber,
@@ -111,21 +113,31 @@ class AuthProvider extends ChangeNotifier {
 
     if (userDoc.exists) {
 
-      String role = userDoc["role"];
+      String role = userDoc["role"] ?? "customer";
+
+      // Check if registration completed
+      bool isRegistered =
+      userDoc.data()!.containsKey("shopName");
 
       if (role == "admin") {
 
         Navigator.pushReplacementNamed(context, "/adminHome");
 
+      } else if (!isRegistered) {
+
+        // New customer -> go to registration
+        Navigator.pushReplacementNamed(context, "/register");
+
       } else {
 
+        // Existing customer
         Navigator.pushReplacementNamed(context, "/customerHome");
 
       }
 
     } else {
 
-      // Create new user
+      // Completely new user
       await _firestore.collection("users").doc(phoneNumber).set({
 
         "phone": phoneNumber,
@@ -134,7 +146,7 @@ class AuthProvider extends ChangeNotifier {
 
       });
 
-      Navigator.pushReplacementNamed(context, "/customerHome");
+      Navigator.pushReplacementNamed(context, "/register");
     }
 
     isLoading = false;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -22,9 +23,32 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   final List<Map<String, dynamic>> _history = [];
 
-  void _sendBroadcast() {
+  Future<void> _sendBroadcast() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
+
+    final senderId = FirebaseAuth.instance.currentUser?.phoneNumber;
+    if (senderId == null || senderId.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Not logged in. Please login again.')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('broadcasts').add({
+        'message': text,
+        'senderId': senderId,
+        'timestamp': FieldValue.serverTimestamp(),
+        'area': 'ALL',
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to send broadcast. Try again.')),
+      );
+      return;
+    }
+
     setState(() {
       _history.insert(0, {
         'text': text,
@@ -34,7 +58,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _messageController.clear();
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Broadcast sent to ${_contacts.length} contacts')),
+      const SnackBar(content: Text('Broadcast saved to Firebase')),
     );
   }
 

@@ -6,6 +6,7 @@ import 'providers/auth_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/admin_home_screen.dart';
 import 'screens/customer_home_screen.dart';
+import 'screens/registration_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/adminHome': (context) => AdminHomeScreen(),
           '/customerHome': (context) => CustomerHomeScreen(),
+          '/register': (context) => RegistrationScreen(),
         },
       ),
     );
