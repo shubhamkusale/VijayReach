@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomerHomeScreen extends StatelessWidget {
   const CustomerHomeScreen({super.key});
+
+  String _formatTimeAgo(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return '${diff.inHours} hr ago';
+    if (diff.inDays == 1) return 'Yesterday';
+    if (diff.inDays < 7) return '${diff.inDays} days ago';
+    return '${time.day}/${time.month}/${time.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,80 +51,97 @@ class CustomerHomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          final messages = [
-            {
-              'title': 'Stock Alert',
-              'body': 'Amoxicillin 500mg back in stock. New batch arrived. Contact for orders.',
-              'time': 'Today 9:30 AM',
-            },
-            {
-              'title': 'Payment Reminder',
-              'body': 'March dues pending. Please clear by 15th to avoid disruption.',
-              'time': 'Yesterday 11:00 AM',
-            },
-            {
-              'title': 'New Product',
-              'body': 'Introducing Zincovit Plus. Contact Vijay for free samples.',
-              'time': 'Mon 2:15 PM',
-            },
-          ];
-          final msg = messages[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE6F1FB),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFB5D4F4)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('broadcasts')
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Failed to load messages'));
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return const Center(child: Text('No messages yet'));
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data() as Map<String, dynamic>? ?? {};
+              final message = (data['message'] ?? '') as String;
+              final Timestamp? ts = data['timestamp'] as Timestamp?;
+              final time = ts?.toDate() ?? DateTime.now();
+              final timeAgo = _formatTimeAgo(time);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE6F1FB),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFB5D4F4)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Color(0xFF042C53),
-                        child: Text('VK',
-                            style: TextStyle(
+                      Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Color(0xFF042C53),
+                            child: Text(
+                              'VK',
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Vijay Kusale',
-                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Vijay Kusale',
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
-                                  color: Color(0xFF042C53))),
-                          Text(msg['time']!,
-                              style: const TextStyle(
-                                  fontSize: 11, color: Color(0xFF378ADD))),
+                                  color: Color(0xFF042C53),
+                                ),
+                              ),
+                              Text(
+                                timeAgo,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF378ADD),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        message,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF185FA5),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(msg['title']!,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: Color(0xFF042C53))),
-                  const SizedBox(height: 4),
-                  Text(msg['body']!,
-                      style: const TextStyle(
-                          fontSize: 13, color: Color(0xFF185FA5))),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

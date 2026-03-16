@@ -242,17 +242,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       const SizedBox(height: 18),
 
-                      /// PHONE
-                      const Text("Phone Number"),
-                      const SizedBox(height: 6),
-
-                      TextField(
-                        enabled: false,
-                        controller:
-                        TextEditingController(text: phoneNumber),
-                        decoration: inputDecoration(""),
-                      ),
-
                       const SizedBox(height: 28),
 
                       /// CONTINUE BUTTON
